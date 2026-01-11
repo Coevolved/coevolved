@@ -1,0 +1,22 @@
+ [build-system]
+ requires = ["hatchling"]
+ build-backend = "hatchling.build"
+
+[project]
+name = "coevolved"
+ version = "0.1.0"
+description = "Coevolved: An incredibly efficient agent framework and runtime"
+ readme = "README.md"
+ requires-python = ">=3.9"
+ authors = [{ name = "Coevolved" }]
+ dependencies = [
+   "openai>=2.15.0",
+   "pydantic>=2.6.0",
+   "uuid_utils>=0.13.0",
+]
+
+ [tool.setuptools]
+ package-dir = { "" = "src" }
+
+ [tool.setuptools.packages.find]
+ where = ["src"]
