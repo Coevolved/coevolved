@@ -4,19 +4,25 @@
 
 [project]
 name = "coevolved"
- version = "0.1.0"
+version = "0.1.0"
 description = "Coevolved: An incredibly efficient agent framework and runtime"
- readme = "README.md"
- requires-python = ">=3.9"
- authors = [{ name = "Coevolved" }]
- dependencies = [
-   "openai>=2.15.0",
-   "pydantic>=2.6.0",
-   "uuid_utils>=0.13.0",
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Coevolved Inc." }]
+dependencies = [
+    "openai>=2.15.0",
+    "pydantic>=2.6.0",
+    "uuid_utils>=0.13.0",
 ]
 
- [tool.setuptools]
- package-dir = { "" = "src" }
+[tool.hatch.build.targets.wheel]
+packages = ["src/coevolved"]
 
- [tool.setuptools.packages.find]
- where = ["src"]
+[tool.hatch.build.targets.sdist]
+include = [
+    "src",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+]
