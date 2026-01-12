@@ -1,8 +1,10 @@
-<picture class="github-only">
-  <source media="(prefers-color-scheme: light)" srcset="https://coevolved.github.io/coevolved-assets/static/wordmark_light.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="https://coevolved.github.io/coevolved-assets/static/wordmark_dark.svg">
-  <img alt="Coevolved Logo" src="https://coevolved.github.io/coevolved-assets/static/wordmark_light.svg" width="80%">
-</picture>
+<p align="center">
+  <picture class="github-only">
+    <source media="(prefers-color-scheme: light)" srcset="https://coevolved.github.io/coevolved-assets/static/wordmark_light.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="https://coevolved.github.io/coevolved-assets/static/wordmark_dark.svg">
+    <img alt="Coevolved Logo" src="https://coevolved.github.io/coevolved-assets/static/wordmark_light.svg" width="80%">
+  </picture>
+</p>
 
 <div>
 <br>
