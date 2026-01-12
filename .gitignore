@@ -4,7 +4,7 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-.env
+.env*
 env/
 venv/
 .venv/
@@ -17,3 +17,12 @@ dist/
 
 # OS files
 .DS_Store
+
+# Linting and formatting
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
