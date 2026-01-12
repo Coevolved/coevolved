@@ -7,9 +7,9 @@ from coevolved.base.compose import (
     with_retry,
 )
 from coevolved.base.step import Step, step
+from coevolved.base.sinks import ConsoleSink, JSONLSink, make_verbose_jsonl_serializer
 from coevolved.base.tracing import (
     BaseEvent,
-    ConsoleSink,
     DefaultFormatter,
     PerTypeFormatter,
     InvocationMetadata,
@@ -76,6 +76,8 @@ __all__ = [
     "TraceEvent",
     "Tracer",
     "ConsoleSink",
+    "JSONLSink",
+    "make_verbose_jsonl_serializer",
     "DefaultFormatter",
     "PerTypeFormatter",
     "SnapshotPolicy",
