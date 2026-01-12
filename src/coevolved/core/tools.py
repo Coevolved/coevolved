@@ -69,7 +69,7 @@ def tool_specs_from_dict(tools: Dict[str, Step]) -> List[ToolSpec]:
     Example:
         >>> tools = {"search": search_tool, "calculate": calc_tool}
         >>> specs = tool_specs_from_dict(tools)
-        >>> context = LLMConfig(model="gpt-4", tools=specs)
+        >>> config = LLMConfig(model="gpt-4", tools=specs)
     """
     return tool_specs_from_steps(tools.values())
 

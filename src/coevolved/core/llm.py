@@ -41,8 +41,8 @@ def llm_step(
     *,
     prompt_builder: PromptBuilder,
     provider: LLMProvider,
-    context: Optional[LLMConfig] = None,
-    context_builder: Optional[Callable[[Any], LLMConfig]] = None,
+    config: Optional[LLMConfig] = None,
+    config_builder: Optional[Callable[[Any], LLMConfig]] = None,
     parser: Optional[Callable[[LLMResponse], Any]] = None,
     name: Optional[str] = None,
     annotations: Optional[Dict[str, Any]] = None,
@@ -61,9 +61,9 @@ def llm_step(
         prompt_builder: Function that builds a prompt from state. Can return
             str, Prompt, PromptPayload, or dict.
         provider: LLM provider implementation (e.g., OpenAIProvider).
-        context: Static LLM context (model, tools, temperature, etc.).
-        context_builder: Function that builds LLM context from state.
-            Exactly one of context or context_builder must be provided.
+        config: Static LLM configuration (model, tools, temperature, etc.).
+        config_builder: Function that builds LLM configuration from state.
+            Exactly one of config or config_builder must be provided.
         parser: Optional function to parse LLMResponse into custom format.
         name: Optional step name. Defaults to "llm_step".
         annotations: Optional metadata annotations.
@@ -76,21 +76,21 @@ def llm_step(
         Step that executes LLM call and attaches/returns result.
     
     Raises:
-        ValueError: If both or neither of context/context_builder are provided.
+        ValueError: If both or neither of config/config_builder are provided.
     
     Example:
         >>> def build_prompt(state):
         ...     return f"Answer: {state['question']}"
-        >>> context = LLMConfig(model="gpt-4", temperature=0.7)
+        >>> config = LLMConfig(model="gpt-4", temperature=0.7)
         >>> step = llm_step(
         ...     prompt_builder=build_prompt,
         ...     provider=OpenAIProvider(client),
-        ...     context=context
+        ...     config=config
         ... )
     """
 
-    if (context is None) == (context_builder is None):
-        raise ValueError("Provide exactly one of context or context_builder.")
+    if (config is None) == (config_builder is None):
+        raise ValueError("Provide exactly one of config or config_builder.")
 
     def run(state: Any) -> Any:
         pb = prompt_builder(state)
@@ -98,8 +98,8 @@ def llm_step(
         if payload.prompt_hash is None:
             payload = payload.model_copy(update={"prompt_hash": _prompt_hash(payload)})
 
-        ctx = context_builder(state) if context_builder else context
-        if ctx is None:
+        cfg = config_builder(state) if config_builder else config
+        if cfg is None:
             raise ValueError("LLMConfig is required for llm_step execution.")
 
         tracer = get_default_tracer()
@@ -127,7 +127,7 @@ def llm_step(
                 )
             )
 
-        response = provider.complete(LLMRequest(prompt=payload, context=ctx))
+        response = provider.complete(LLMRequest(prompt=payload, context=cfg))
         if invocation_ctx:
             tracer.emit(
                 LLMEvent(

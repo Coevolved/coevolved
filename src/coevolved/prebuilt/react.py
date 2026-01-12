@@ -72,7 +72,7 @@ def react_agent(
         >>> planner = llm_step(
         ...     prompt_builder=build_prompt,
         ...     provider=provider,
-        ...     context=context
+        ...     config=config
         ... )
         >>> tools = {"search": search_tool, "calculate": calc_tool}
         >>> agent = react_agent(planner=planner, tools=tools, max_steps=10)
