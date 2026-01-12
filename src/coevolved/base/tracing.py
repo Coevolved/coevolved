@@ -6,7 +6,6 @@ and snapshot policies for capturing execution metadata.
 
 import hashlib
 import json
-import logging
 import uuid
 from contextvars import ContextVar
 from dataclasses import asdict, dataclass
@@ -195,23 +194,6 @@ class PerTypeFormatter:
         return formatter.format(event)
 
 
-class ConsoleSink:
-    """Lightweight default sink; logs a compact, readable line.
-    
-    Args:
-        formatter: Optional formatter. Uses DefaultFormatter if not provided.
-    """
-
-    def __init__(self, formatter: Optional[EventFormatter] = None) -> None:
-        self.formatter = formatter or DefaultFormatter()
-
-    def emit(self, event: BaseEvent) -> None:
-        logger = logging.getLogger("base.tracing")
-        summary = self.formatter.format(event)
-        if summary:
-            logger.info(summary)
-
-
 class Tracer:
     """Central tracing coordinator.
     
@@ -278,7 +260,7 @@ class Tracer:
             return hashlib.sha256(fallback.encode("utf-8")).hexdigest(), True
 
 
-_default_tracer: Tracer = Tracer([ConsoleSink()])
+_default_tracer: Optional[Tracer] = None
 
 
 def get_default_tracer() -> Tracer:
@@ -287,6 +269,13 @@ def get_default_tracer() -> Tracer:
     Returns:
         The global default tracer (initialized with ConsoleSink).
     """
+    global _default_tracer
+    if _default_tracer is None:
+        # Import lazily to keep sinks in a separate subpackage without
+        # creating import cycles at module import time.
+        from coevolved.base.sinks.console import ConsoleSink
+
+        _default_tracer = Tracer([ConsoleSink()])
     return _default_tracer
 
 
@@ -298,6 +287,19 @@ def set_default_tracer(tracer: Tracer) -> None:
     """
     global _default_tracer
     _default_tracer = tracer
+
+
+def __getattr__(name: str) -> Any:
+    """Lazy re-exports for sinks moved under coevolved.base.sinks."""
+    if name == "ConsoleSink":
+        from coevolved.base.sinks.console import ConsoleSink as _ConsoleSink
+
+        return _ConsoleSink
+    if name == "JSONLSink":
+        from coevolved.base.sinks.jsonl import JSONLSink as _JSONLSink
+
+        return _JSONLSink
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def _default_json_serializer(obj: Any) -> Any:
