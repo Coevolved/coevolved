@@ -4,6 +4,8 @@ This module provides the Interrupt exception and related utilities for pausing
 workflow execution to request external input, then resuming with the provided value.
 """
 
+import hashlib
+import inspect
 import uuid
 from contextvars import ContextVar
 from dataclasses import dataclass
@@ -77,7 +79,26 @@ class Interrupt(Exception):
 _resume_values: ContextVar[dict[str, Any]] = ContextVar("resume_values", default={})
 
 
-def interrupt(value: Any) -> Any:
+def _default_interrupt_id() -> str:
+    """Generate a stable interrupt_id for the current call site.
+
+    We want a deterministic id so that callers can resume by providing a value
+    for the same interrupt_id on a subsequent execution.
+    """
+    try:
+        frame = inspect.currentframe()
+        caller = frame.f_back if frame else None
+        if caller is None:
+            raise RuntimeError("No caller frame available")
+        callsite = f"{caller.f_code.co_filename}:{caller.f_lineno}:{caller.f_code.co_name}"
+        # Keep it reasonably short but collision-resistant for typical projects.
+        return hashlib.sha256(callsite.encode("utf-8")).hexdigest()[:32]
+    except Exception:
+        # Fallback: still stable enough within a single run, and avoids failing.
+        return str(uuid.uuid4())
+
+
+def interrupt(value: Any, *, key: Optional[str] = None) -> Any:
     """Pause execution and request human input.
     
     On first call within a step, raises an Interrupt exception to pause execution.
@@ -87,6 +108,9 @@ def interrupt(value: Any) -> Any:
     Args:
         value: Context or data to present to the human. Can be any serializable
             value (string, dict, etc.).
+        key: Optional stable key to use as the interrupt_id. Use this when the
+            same call site may legitimately need distinct interrupts (e.g., inside
+            a loop) and you want to disambiguate them.
     
     Returns:
         The value provided when resuming (only on resume, not first call).
@@ -105,14 +129,17 @@ def interrupt(value: Any) -> Any:
         ...     state["approved"] = response.get("approved", False)
         ...     return state
     """
-    interrupt_id = str(uuid.uuid4())
-    
-    # Check if we have a resume value for this interrupt
-    resume_values = _resume_values.get()
+    interrupt_id = key or _default_interrupt_id()
+
+    # Check if we have a resume value for this interrupt.
+    # Always copy + set to avoid mutating the ContextVar default dict.
+    resume_values = _resume_values.get().copy()
     if interrupt_id in resume_values:
-        return resume_values.pop(interrupt_id)
-    
-    # No resume value - raise to pause execution
+        resumed = resume_values.pop(interrupt_id)
+        _resume_values.set(resume_values)
+        return resumed
+
+    # No resume value - raise to pause execution.
     raise Interrupt(value, interrupt_id=interrupt_id)
 
 

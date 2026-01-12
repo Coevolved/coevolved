@@ -61,7 +61,7 @@ class LoopPolicy:
         timeout_seconds: Optional timeout for the entire loop.
         checkpoint_store: Optional store for checkpointing state.
         checkpoint_policy: When to create checkpoints.
-        execution_policy: Optional policy for budget enforcement.
+        usage_policy: Optional policy for budget enforcement.
     
     Example:
         >>> policy = LoopPolicy(
@@ -74,7 +74,7 @@ class LoopPolicy:
     timeout_seconds: Optional[float] = None
     checkpoint_store: Optional[CheckpointStore] = None
     checkpoint_policy: CheckpointPolicy = field(default_factory=CheckpointPolicy)
-    execution_policy: Optional[UsagePolicy] = None
+    usage_policy: Optional[UsagePolicy] = None
 
 
 # Type aliases for clarity
@@ -134,8 +134,8 @@ def agent_loop(
         
         # Set up usage tracking if policy provided
         outer_tracker = get_usage_tracker()
-        if loop_policy.execution_policy:
-            tracker = UsageTracker(loop_policy.execution_policy)
+        if loop_policy.usage_policy:
+            tracker = UsageTracker(loop_policy.usage_policy)
             set_usage_tracker(tracker)
         
         # Emit loop start event
@@ -162,7 +162,7 @@ def agent_loop(
                         break
                 
                 # Check execution policy
-                if loop_policy.execution_policy:
+                if loop_policy.usage_policy:
                     tracker = get_usage_tracker()
                     if tracker and not tracker.check("step"):
                         break
@@ -210,7 +210,7 @@ def agent_loop(
                         loop_state.last_checkpoint_id = cp.checkpoint_id
                     
                     # Record step in execution context
-                    if loop_policy.execution_policy:
+                    if loop_policy.usage_policy:
                         tracker = get_usage_tracker()
                         if tracker:
                             tracker.record_step("agent")
@@ -268,7 +268,7 @@ def agent_loop(
             # Restore outer usage tracker
             if outer_tracker:
                 set_usage_tracker(outer_tracker)
-            elif loop_policy.execution_policy:
+            elif loop_policy.usage_policy:
                 clear_usage_tracker()
     
     return Step(
