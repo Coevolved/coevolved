@@ -12,7 +12,7 @@ deploying agent systems in production.
 Install the `coevolved` package from PyPI:
 
 ```bash
-pip install coevolved
+pip install -U coevolved
 ```
 
 ## Value Adds
