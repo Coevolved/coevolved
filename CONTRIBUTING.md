@@ -1,6 +1,6 @@
 # Coevolved Code Contribution Guidelines
 
-First things first, thanks for even being interested in contributing!
+First thing's first, thanks for even being interested in contributing!
 
 All types of contributions are encouraged and valued. See the [Table of
 Contents](#table-of-contents) for different ways to help and details about

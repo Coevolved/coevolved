@@ -1,6 +1,17 @@
-# Coevolved Agent Development Framework
+<picture class="github-only">
+  <source media="(prefers-color-scheme: light)" srcset="https://coevolved.github.io/coevolved-assets/static/wordmark_light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://coevolved.github.io/coevolved-assets/static/wordmark_dark.svg">
+  <img alt="Coevolved Logo" src="https://coevolved.github.io/coevolved-assets/static/wordmark_light.svg" width="80%">
+</picture>
 
+<div>
+<br>
+</div>
+
+[![PyPI](https://img.shields.io/pypi/v/coevolved.svg)](https://pypi.org/project/coevolved/)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Y Combinator W26](https://img.shields.io/badge/Y%20Combinator-W26-orange)](https://www.ycombinator.com/companies/coevolved)
+
 
 The Coevolved Agent Development Framework is a flexible, atomic-first framework
 that gives software developers more control over AI agent construction. It is an
