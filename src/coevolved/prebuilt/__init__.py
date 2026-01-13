@@ -6,6 +6,7 @@ from coevolved.prebuilt.context import (
 )
 from coevolved.prebuilt.events import AgentEvent
 from coevolved.prebuilt.formatters import DefaultAgentFormatter
+from coevolved.prebuilt.llm_retry import agent_retry, llm_retry
 from coevolved.prebuilt.loop import (
     LoopPolicy,
     LoopState,
@@ -22,6 +23,9 @@ __all__ = [
     "simple_loop",
     "LoopPolicy",
     "LoopState",
+    # LLM and agent retry
+    "llm_retry",
+    "agent_retry",
     # Events and context
     "AgentEvent",
     "AgentContext",

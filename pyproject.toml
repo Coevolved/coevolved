@@ -16,6 +16,9 @@ dependencies = [
     "uuid_utils>=0.13.0",
 ]
 
+[project.optional-dependencies]
+anthropic = ["anthropic>=0.25.0"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/coevolved"]
 
