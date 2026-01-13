@@ -94,7 +94,7 @@ class OpenAIProvider:
             text = getattr(delta, "content", None)
             
             # Extract tool call deltas
-            tool_call_delta = None
+            tool_call_deltas: List[Dict[str, Any]] = []
             if hasattr(delta, "tool_calls") and delta.tool_calls:
                 for tc in delta.tool_calls:
                     idx = tc.index
@@ -108,12 +108,14 @@ class OpenAIProvider:
                         tool_calls_builder[idx]["arguments"] += tc.function.arguments
                     
                     # Include delta info in chunk
-                    tool_call_delta = {
-                        "index": idx,
-                        "id": tc.id,
-                        "name": tc.function.name if tc.function else None,
-                        "arguments_delta": tc.function.arguments if tc.function else None,
-                    }
+                    tool_call_deltas.append(
+                        {
+                            "index": idx,
+                            "id": tc.id,
+                            "name": tc.function.name if tc.function else None,
+                            "arguments_delta": tc.function.arguments if tc.function else None,
+                        }
+                    )
             
             # Check for finish
             finish_reason = getattr(choice, "finish_reason", None)
@@ -123,9 +125,23 @@ class OpenAIProvider:
             if hasattr(chunk, "usage") and chunk.usage:
                 usage = _usage_dict(chunk.usage)
             
+            if tool_call_deltas:
+                for idx, tool_call_delta in enumerate(tool_call_deltas):
+                    is_last = idx == len(tool_call_deltas) - 1
+                    yield LLMStreamChunk(
+                        text=text if idx == 0 else None,
+                        tool_call_delta=tool_call_delta,
+                        finish_reason=finish_reason if is_last else None,
+                        usage=usage if is_last else None,
+                    )
+                continue
+
+            if text is None and finish_reason is None and usage is None:
+                continue
+
             yield LLMStreamChunk(
                 text=text,
-                tool_call_delta=tool_call_delta,
+                tool_call_delta=None,
                 finish_reason=finish_reason,
                 usage=usage,
             )
@@ -143,7 +159,7 @@ class OpenAIProvider:
         if tools:
             params["tools"] = tools
             if request.context.tool_choice:
-                params["tool_choice"] = request.context.tool_choice
+                params["tool_choice"] = _openai_tool_choice(request.context.tool_choice)
         
         if request.context.temperature is not None:
             params["temperature"] = request.context.temperature
@@ -214,6 +230,13 @@ def _openai_tool_specs(tools: List[ToolSpec]) -> List[Dict[str, Any]]:
             }
         )
     return specs
+
+
+def _openai_tool_choice(value: str) -> Any:
+    """Normalize tool_choice for OpenAI API."""
+    if value in {"auto", "none"}:
+        return value
+    return {"type": "function", "function": {"name": value}}
 
 
 def _coerce_messages(prompt: PromptPayload) -> List[Dict[str, Any]]:
