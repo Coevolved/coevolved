@@ -16,6 +16,17 @@ dependencies = [
     "uuid_utils>=0.13.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/coevolved"]
 

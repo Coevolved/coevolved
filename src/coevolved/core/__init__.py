@@ -16,6 +16,11 @@ from coevolved.core.types import (
 from coevolved.core.tools import tool_spec_from_step, tool_specs_from_dict, tool_specs_from_steps
 from coevolved.core.formatters import DefaultLLMFormatter
 from coevolved.core.providers import OpenAIProvider
+from coevolved.core.repair import (
+    LLMRepairPolicy,
+    validated_llm_step,
+    default_failure_to_input,
+)
 
 __all__ = [
     # LLM step
@@ -49,4 +54,8 @@ __all__ = [
     "DefaultLLMFormatter",
     # Providers
     "OpenAIProvider",
+    # Validation and Repair
+    "LLMRepairPolicy",
+    "validated_llm_step",
+    "default_failure_to_input",
 ]

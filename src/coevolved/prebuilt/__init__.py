@@ -13,6 +13,7 @@ from coevolved.prebuilt.loop import (
     simple_loop,
 )
 from coevolved.prebuilt.react import react_agent
+from coevolved.prebuilt.retry import llm_retry, agent_retry
 
 __all__ = [
     # React agent
@@ -29,4 +30,7 @@ __all__ = [
     "set_agent_context",
     "clear_agent_context",
     "get_agent_context",
+    # Retry helpers
+    "llm_retry",
+    "agent_retry",
 ]
