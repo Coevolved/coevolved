@@ -209,8 +209,14 @@ def validated_llm_step(
     failure_fn = policy.failure_to_input or default_failure_to_input
     
     # Parser that validates response and converts to Pydantic model
+    # Also captures the response for use in repair if validation fails
+    last_response_holder = {"response": None}
+    
     def parse_and_validate(response: LLMResponse) -> BaseModel:
         """Parse and validate LLM response."""
+        # Capture the response for potential repair use
+        last_response_holder["response"] = response
+        
         if not response.text:
             raise ValueError("LLM response contains no text to validate")
         
@@ -307,21 +313,22 @@ def validated_llm_step(
                 pb = current_prompt_builder(current_state)
                 prompt_payload = _coerce_prompt_payload(pb, current_state)
                 
-                # Create a mock response for failure_fn (we need the failed text)
-                # In a real scenario, we'd capture the actual response
-                mock_response = LLMResponse(text="")
+                # Get the actual failed response (captured by parse_and_validate)
+                failed_response = last_response_holder.get("response", LLMResponse(text=""))
                 
                 # Transform failure into new input
                 repaired_input = failure_fn(
                     exc,
                     current_state,
                     prompt_payload,
-                    mock_response,
+                    failed_response,
                     attempt,
                 )
                 
-                # Update prompt builder to use repaired input
-                current_prompt_builder = lambda s, inp=repaired_input: inp
+                # Update prompt builder to use repaired input with an explicit closure
+                def _make_repaired_prompt_builder(inp):
+                    return lambda s: inp
+                current_prompt_builder = _make_repaired_prompt_builder(repaired_input)
                 
                 # Apply backoff if configured
                 if delay is not None:
